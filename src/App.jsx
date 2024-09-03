@@ -18,15 +18,15 @@ const App = () => {
 
   useEffect(() => {
     console.log('useEffect1: Fetching blogs; user =', user)
-    //if (user !== null) {
+    if (user !== null) {
       blogService.getAll().then(blogs =>
         setBlogs( blogs.sort((a, b) => b.likes - a.likes) )
       ) 
-    //} else{
-    //  console.log('User is null, not fetching blogs; user =', user)
-    //}
-    console.log('useEffect1: Done fetching blogs; user =', user, 'blogs =', blogs)
-  }, [])
+      console.log('useEffect1: Done fetching blogs; user =', user, 'blogs =', blogs)
+    } else{
+      console.log('User is null, not fetching blogs; user =', user)
+    }
+  }, [user])
 
   useEffect(() => {
     console.log('useEffect2: Checking local storage for user')
@@ -84,6 +84,7 @@ const App = () => {
       setUser(null)
       setUsername('')
       setPassword('')
+      setBlogs([]) // Clear blogs on logout
     } catch (exception) {
       console.log('Logout did not work', exception)
       setErrorMessage('logout did not work')
@@ -169,14 +170,17 @@ const App = () => {
             <button onClick={() => handleLogout()}>logout</button>
           </p>
           {blogForm()}
-       </div>
+        </div>
       }
-      <div>
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} currentUser={user} onRemove={handleRemoveBlog} onLike={reSortBlogs}/>
-        )}
-      </div>
-
+      {
+        blogs.length !== 0 ?
+        blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} currentUser={user} onRemove={handleRemoveBlog} onLike={reSortBlogs}/>) :
+        <div>
+          <p>Please login to see blogs</p>
+        </div>
+        
+      }
     </div>
   )
 }

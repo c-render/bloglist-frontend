@@ -66,6 +66,8 @@ const Blog = ({ blog, currentUser, onRemove, onLike }) => {
       <div style={showWhenVisible}>
         {blog.url} <br />
         likes {blogState.likes} <button onClick={handleLike}>like</button> <br />
+        {console.log('Blog user:', blog.user)}
+        {console.log('Current user:', currentUser)}
         {blog.user.name} <br />
         {currentUser.username === blog.user.username ? <button onClick={handleRemove}>remove</button> : null}
       </div>
