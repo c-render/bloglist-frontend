@@ -4,13 +4,28 @@ import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import ErrorMessage from './components/ErrorMessage'
 import Notification from './components/Notification'
+import ReactDOM from 'react-dom/client'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
+import { createStore } from 'redux'
 import loginService from './services/login'
+
+const notificationReducer = (state = null, action) => {
+  switch (action.type) {
+    case 'SET_NOTIFICATION':
+      return action.data
+    case 'CLEAR_NOTIFICATION':
+      return null
+    default:
+      return state
+  }
+}
+
+const store = createStore(notificationReducer)
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [notificationMessage, setNotificationMessage] = useState(null)
+  //const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -43,9 +58,16 @@ const App = () => {
 
 
   const Notify = (message) => {
-    setNotificationMessage(message)
+    //setNotificationMessage(message)
+    store.dispatch({
+      type: 'SET_NOTIFICATION',
+      data: message
+    })
     setTimeout(() => {
-      setNotificationMessage(null)
+      // setNotificationMessage(null)
+      store.dispatch({
+        type: 'CLEAR_NOTIFICATION'
+      })
     }, 5000)
   }
 
@@ -159,7 +181,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={notificationMessage} />
+      <Notification message={store.getState()} />
       <ErrorMessage message={errorMessage} />
 
       {
@@ -184,5 +206,14 @@ const App = () => {
     </div>
   )
 }
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+
+const renderApp = () => {
+  root.render(<App />)
+}
+
+renderApp()
+store.subscribe(renderApp)
 
 export default App
