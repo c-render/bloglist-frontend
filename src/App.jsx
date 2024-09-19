@@ -1,29 +1,21 @@
+import { clearNotificationMessage, setNotificationMessage } from './reducers/notificationReducer'
+import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useRef, useState } from 'react'
 
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import ErrorMessage from './components/ErrorMessage'
 import Notification from './components/Notification'
-import ReactDOM from 'react-dom/client'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
-import { createStore } from 'redux'
 import loginService from './services/login'
 
-const notificationReducer = (state = null, action) => {
-  switch (action.type) {
-    case 'SET_NOTIFICATION':
-      return action.data
-    case 'CLEAR_NOTIFICATION':
-      return null
-    default:
-      return state
-  }
-}
-
-const store = createStore(notificationReducer)
+//import notify from './reducers/notificationReducer'
 
 const App = () => {
+  const dispatch = useDispatch()
+  const notificationMessage = useSelector(state => state)
+
   const [blogs, setBlogs] = useState([])
   //const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -55,19 +47,13 @@ const App = () => {
     console.log('useEffect2: Done checking local storage for user; user =', user)
   }, [])
   
-
-
   const Notify = (message) => {
-    //setNotificationMessage(message)
-    store.dispatch({
-      type: 'SET_NOTIFICATION',
-      data: message
-    })
+    //notify(message)
+    console.log('Notify:', message)
+    dispatch(setNotificationMessage(message))
     setTimeout(() => {
-      // setNotificationMessage(null)
-      store.dispatch({
-        type: 'CLEAR_NOTIFICATION'
-      })
+      dispatch(clearNotificationMessage())
+      console.log('Notify: Cleared')
     }, 5000)
   }
 
@@ -148,6 +134,7 @@ const App = () => {
         .then(returnedBlog => {
         console.log('returnedBlog:', returnedBlog)
         setBlogs(blogs.concat(returnedBlog))
+        console.log('Notification Message:', `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
         Notify(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
       })
   }
@@ -181,7 +168,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={store.getState()} />
+      <Notification />
       <ErrorMessage message={errorMessage} />
 
       {
@@ -206,14 +193,5 @@ const App = () => {
     </div>
   )
 }
-
-const root = ReactDOM.createRoot(document.getElementById('root'))
-
-const renderApp = () => {
-  root.render(<App />)
-}
-
-renderApp()
-store.subscribe(renderApp)
 
 export default App
