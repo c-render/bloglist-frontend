@@ -1,5 +1,6 @@
 //import { clearNotificationMessage, setNotificationMessage } from './reducers/notificationReducer'
 
+import { addBlog, setBlogs } from './reducers/blogReducer'
 import { clearNotificationMessage, setNotificationMessage } from './reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useRef, useState } from 'react'
@@ -16,9 +17,12 @@ import loginService from './services/login'
 
 const App = () => {
   const dispatch = useDispatch()
-  const notificationMessage = useSelector(state => state)
+  //const notificationMessage = useSelector(state => state.notification)
+  const blogs = useSelector(state => state.blogs)
 
-  const [blogs, setBlogs] = useState([])
+  console.log('App: blogs =', blogs)
+
+  //const [blogs, setBlogs] = useState([])
   //const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
@@ -28,9 +32,9 @@ const App = () => {
   useEffect(() => {
     console.log('useEffect1: Fetching blogs; user =', user)
     if (user !== null) {
-      blogService.getAll().then(blogs =>
-        setBlogs( blogs.sort((a, b) => b.likes - a.likes) )
-      ) 
+      blogService.getAll().then(blogs => {
+        dispatch(setBlogs(blogs.sort((a, b) => b.likes - a.likes)))
+      }) 
       console.log('useEffect1: Done fetching blogs; user =', user, 'blogs =', blogs)
     } else{
       console.log('User is null, not fetching blogs; user =', user)
@@ -94,7 +98,7 @@ const App = () => {
       setUser(null)
       setUsername('')
       setPassword('')
-      setBlogs([]) // Clear blogs on logout
+      dispatch(setBlogs([])) // Clear blogs on logout
     } catch (exception) {
       console.log('Logout did not work', exception)
       setErrorMessage('logout did not work')
@@ -129,27 +133,27 @@ const App = () => {
   )
   const blogFormRef = useRef()
 
-  const addBlog = (blogObject) => {
+  const addNewBlog = (blogObject) => {
     blogFormRef.current.toggleVisibility()
     blogService
       .create(blogObject)
         .then(returnedBlog => {
         console.log('returnedBlog:', returnedBlog)
-        setBlogs(blogs.concat(returnedBlog))
+        dispatch(addBlog(returnedBlog))
         console.log('Notification Message:', `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
         Notify(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
       })
   }
 
   const handleRemoveBlog = (id) => {
-    setBlogs(blogs.filter(blog => blog.id !== id))
+    dispatch(setBlogs(blogs.filter(blog => blog.id !== id)))
   }
 
   const blogForm = () => {
     return (
       <div>
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
-          <BlogForm createBlog={addBlog} />
+          <BlogForm createBlog={addNewBlog} />
         </Togglable>
       </div>
     )
@@ -164,7 +168,7 @@ const App = () => {
     const updatedBlogs = blogs.map(blog =>
       blog.id ===  updatedBlog.id ? updatedBlog : blog
     )
-    setBlogs(updatedBlogs.sort(compareLikes))
+    dispatch(setBlogs(updatedBlogs.sort(compareLikes)))
   }
 
   return (
