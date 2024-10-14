@@ -2,6 +2,7 @@
 
 import { addBlog, setBlogs } from './reducers/blogReducer'
 import { clearNotificationMessage, setNotificationMessage } from './reducers/notificationReducer'
+import { clearUser, setPassword, setUser, setUsername } from './reducers/userReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useRef, useState } from 'react'
 
@@ -19,15 +20,18 @@ const App = () => {
   const dispatch = useDispatch()
   //const notificationMessage = useSelector(state => state.notification)
   const blogs = useSelector(state => state.blogs)
+  const user = useSelector(state => state.user.user)
+  const username = useSelector(state => state.user.username)
+  const password = useSelector(state => state.user.password)
 
   console.log('App: blogs =', blogs)
 
   //const [blogs, setBlogs] = useState([])
   //const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
+  //const [username, setUsername] = useState('')
+  //const [password, setPassword] = useState('')
+  //const [user, setUser] = useState(null)
 
   useEffect(() => {
     console.log('useEffect1: Fetching blogs; user =', user)
@@ -81,9 +85,9 @@ const App = () => {
         'loggedBlogappUser', JSON.stringify(user)
       ) 
       blogService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
+      dispatch(setUser(user))
+      // setUsername('')
+      // setPassword('')
     } catch (exception) {
       ShowError('Wrong credentials')
     }
@@ -95,9 +99,10 @@ const App = () => {
     try {
       window.localStorage.removeItem('loggedBlogappUser')
       blogService.setToken(null)
-      setUser(null)
-      setUsername('')
-      setPassword('')
+      dispatch(clearUser())
+      //setUser(null)
+      //setUsername('')
+      //setPassword('')
       dispatch(setBlogs([])) // Clear blogs on logout
     } catch (exception) {
       console.log('Logout did not work', exception)
@@ -116,7 +121,7 @@ const App = () => {
           type="text"
           value={username}
           name="Username"
-          onChange={({ target }) => setUsername(target.value)}
+          onChange={({ target }) => dispatch(setUsername(target.value))}
         />
       </div>
       <div>
@@ -125,7 +130,7 @@ const App = () => {
           type="password"
           value={password}
           name="Password"
-          onChange={({ target }) => setPassword(target.value)}
+          onChange={({ target }) => dispatch(setPassword(target.value))}
         />
       </div>
       <button type="submit">login</button>
